@@ -1,22 +1,22 @@
 {
-  "name": "iobroker.template",
+  "name": "iobroker.checkmk",
   "version": "0.0.1",
-  "description": "Template for adapter development",
+  "description": "Connection to checkmk",
   "author": {
-    "name": "Author",
-    "email": "author@mail.com"
+    "name": "rde-master",
+    "email": "info@rde-master.de"
   },
-  "homepage": "https://github.com/Author/ioBroker.template",
+  "homepage": "https://github.com/rde-master/ioBroker.checkmk",
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "template",
+    "checkmk",
     "Smart Home",
-    "home automation"
+    "Monitoring"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Author/ioBroker.template"
+    "url": "https://github.com/rde-master/ioBroker.checkmk"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.5.1"
@@ -64,7 +64,7 @@
     "release": "release-script"
   },
   "bugs": {
-    "url": "https://github.com/Author/ioBroker.template/issues"
+    "url": "https://github.com/rde-master/ioBroker.checkmk/issues"
   },
   "readmeFilename": "README.md"
 }
