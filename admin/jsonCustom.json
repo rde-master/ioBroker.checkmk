@@ -1,0 +1,120 @@
+{
+  "items": {
+    "_status": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'number' || customObj.common.type != 'string' || customObj.common.type != 'boolean'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'number' || customObj.common.type != 'string' || customObj.common.type != 'boolean'",
+      "newLine": true,
+      "type": "header",
+      "text": "Status",
+      "sm": 12
+    },
+    "Status_OK": {
+      "type": "text",
+      "label": "OK",
+      "default": "OK",
+      "help": "Text for Status OK",
+      "sm": 12
+    },
+    "Status_Warning": {
+      "type": "text",
+      "label": "Warning",
+      "default": "Warning",
+      "help": "Text for Status Warning",
+      "sm": 12
+    },
+    "Status_critical": {
+      "type": "text",
+      "label": "Error",
+      "default": "Critical",
+      "help": "Text for Status critical",
+      "sm": 12
+    },
+    "_boolean": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'boolean'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'boolean'",
+      "newLine": true,
+      "type": "header",
+      "text": "boolean",
+      "sm": 12
+    },
+    "bool_wert_ok": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'boolean'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'boolean'",
+      "label": "True == OK",
+      "type": "checkbox",
+      "help": "if checked True OK / false Critikal -- if uncheckt true critikal / false ok",
+      "default": true,
+      "sm": 12
+    },
+    "_number": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'number'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'number'",
+      "newLine": true,
+      "type": "header",
+      "text": "Number",
+      "sm": 12
+    },
+    "num_wert_inverse": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'number'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'number'",
+      "label": "inverse",
+      "type": "checkbox",
+      "help": "inverse the trigger",
+      "default": false,
+      "sm": 4
+    },
+    "num_wert_warning": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'number'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'number'",
+      "type": "number",
+      "label": "Wert for warning (<=)",
+      "default": 0,
+      "sm": 4
+    },
+    "num_wert_critikal": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'number'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'number'",
+      "type": "number",
+      "label": "Wert for critikal (>=)",
+      "default": 0,
+      "sm": 4
+    },
+    "_string": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'string'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'string'",
+      "newLine": true,
+      "type": "header",
+      "text": "String",
+      "sm": 12
+    },
+    "str_wert_ok": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'string'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'string'",
+      "label": "Wert OK",
+      "type": "text",
+      "sm": 12
+    },
+    "str_wert_warning": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'string'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'string'",
+      "label": "Wert warning",
+      "type": "text",
+      "sm": 12
+    },
+    "str_wert_critikal": {
+      "hidden" : "customObj && customObj.common && customObj.common.type != 'string'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'string'",
+      "label": "Wert critikal",
+      "type": "text",
+      "sm": 12
+    },
+    "_not_support": {
+      "hidden" : "customObj && customObj.common && customObj.common.type === 'number' || customObj.common.type === 'string' || customObj.common.type === 'boolean'",
+      "disabled": "customObj && customObj.common && customObj.common.type != 'string'",
+      "newLine": true,
+      "type": "header",
+      "text": "This Type is not supported! Only Boolean, Number, String!",
+      "sm": 12
+    }
+  }
+}

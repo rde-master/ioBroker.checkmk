@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('/root/checkmk_adapter/.dev-server/default/node_modules/iobroker.js-controller/lib/setup').execute();

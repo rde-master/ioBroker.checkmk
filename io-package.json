@@ -53,33 +53,16 @@
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "main.js",
-        "icon": "template.png",
-        "enabled": true,
+        "icon": "checkmk_logo.png",
+        "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/Author/ioBroker.template/main/admin/template.png",
         "readme": "https://github.com/Author/ioBroker.template/blob/main/README.md",
         "loglevel": "info",
         "mode": "daemon",
         "type": "general",
-        "compact": true,
+        "getHistory": true,
+        "compact": false,
         "materialize": true,
-        "materializeTab": true,
-        "adminTab": {
-            "singleton": true,
-            "name": {
-                "en": "Template (JavaScript)",
-                "de": "Vorlage (JavaScript)",
-                "ru": "Шаблон (JavaScript)",
-                "pt": "Modelo (JavaScript)",
-                "nl": "Sjabloon (JavaScript)",
-                "fr": "Modèle (JavaScript)",
-                "it": "Modello (JavaScript)",
-                "es": "Plantilla (JavaScript)",
-                "pl": "Szablon (JavaScript)",
-                "zh-cn": "模板 (JavaScript)"
-            },
-            "link": "",
-            "fa-icon": "info"
-        },
         "supportCustoms": true,
         "dependencies": [
             {
@@ -88,8 +71,8 @@
         ]
     },
     "native": {
-        "option1": true,
-        "option2": "42"
+        "ip": "0.0.0.0",
+        "port": "6556"
     },
     "objects": [],
     "instanceObjects": []

@@ -1,167 +1,458 @@
+/**
+ Api erkärung:
+ https://developer.todoist.com/rest/v1/
+ Das ist ein test!
+*/
+
+ 
+/*
+
+Statis für Check MK:
+0,1 = OK
+2 = Warn
+3 = error
+
+
+*/
+ 
+
+/* jshint -W097 */
+/* jshint strict: false */
+/* jslint node: true */
 'use strict';
 
-/*
- * Created with @iobroker/create-adapter v2.0.1
- */
 
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
-const utils = require('@iobroker/adapter-core');
 
-// Load your modules here, e.g.:
-// const fs = require("fs");
 
-class Template extends utils.Adapter {
+// @ts-ignore
+const utils = require('@iobroker/adapter-core'); // Get common adapter utils
+const adapterName = require('./package.json').name.split('.').pop();
+//const request = require("request");
+// @ts-ignore
+//const axios = require('axios').default;
+// @ts-ignore
 
-    /**
-     * @param {Partial<utils.AdapterOptions>} [options={}]
-     */
-    constructor(options) {
-        super({
-            ...options,
-            name: 'template',
-        });
-        this.on('ready', this.onReady.bind(this));
-        this.on('stateChange', this.onStateChange.bind(this));
-        // this.on('objectChange', this.onObjectChange.bind(this));
-        // this.on('message', this.onMessage.bind(this));
-        this.on('unload', this.onUnload.bind(this));
-    }
+const checkmk = require('./lib/checkmk.js');
+let option_checkmk = {host: '', port: 0, encoding: 'utf8', exclusive: true};
 
-    /**
-     * Is called when databases are connected and adapter received configuration.
-     */
-    async onReady() {
-        // Initialize your adapter here
 
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
-        // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
+let adapter;
 
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
-        await this.setObjectNotExistsAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
 
-        // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
-        // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-        // this.subscribeStates('lights.*');
-        // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-        // this.subscribeStates('*');
+async function startAdapter(options) {
+    options = options || {};
+    Object.assign(options, {name: adapterName});
 
-        /*
-            setState examples
-            you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
+    adapter = new utils.Adapter(options);
+	
+    //Liste aller Datenpunkte
+    adapter._checkmkDPs             = {};    
 
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
 
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
+    adapter.on('message', obj => {
+        adapter.log.info("message: " + JSON.stringify(obj));
+        //processMessages(obj);
+    });
 
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
+    adapter.on('ready', () => {
+        
+        option_checkmk.host = adapter.config.ip;
+        option_checkmk.port = adapter.config.port;
 
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
-    }
 
-    /**
-     * Is called when adapter shuts down - callback has to be called under any circumstances!
-     * @param {() => void} callback
-     */
-    onUnload(callback) {
+        new checkmk.createServer(option_checkmk);
+        load_adapters();
+        load_objekte();
+        main();
+        
+    });
+
+    adapter.on('unload', (callback) => {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
-
+                          
+                
             callback();
         } catch (e) {
             callback();
         }
-    }
 
-    // If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-    // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-    // /**
-    //  * Is called if a subscribed object changes
-    //  * @param {string} id
-    //  * @param {ioBroker.Object | null | undefined} obj
-    //  */
-    // onObjectChange(id, obj) {
-    //     if (obj) {
-    //         // The object was changed
-    //         this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-    //     } else {
-    //         // The object was deleted
-    //         this.log.info(`object ${id} deleted`);
-    //     }
-    // }
+        
+    });
 
-    /**
-     * Is called if a subscribed state changes
-     * @param {string} id
-     * @param {ioBroker.State | null | undefined} state
-     */
-    onStateChange(id, state) {
-        if (state) {
-            // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-        } else {
-            // The state was deleted
-            this.log.info(`state ${id} deleted`);
+    
+    
+    
+    // is called if a subscribed state changes
+    adapter.on('stateChange', (id, state) => {
+        //nur wenn ack true ist.
+        if(state.ack){
+        //prüfen ob das ein adapter ist:
+            if(id.substr(0,14) == "system.adapter"){
+                //adapter.log.info("Adapter change");
+                update_adapter_checkmk(id,state);
+            }else{
+                //adapter.log.info("state change");
+                update_states_checkmk(id,state);
+            }
         }
+    });  
+    
+
+    //is callend if a subscribed object changes
+    adapter.on('objectChange', (id, obj) => {
+        if (obj && obj.common &&
+            (obj.common.custom && obj.common.custom[adapter.namespace] && typeof obj.common.custom[adapter.namespace] === 'object' && obj.common.custom[adapter.namespace].enabled)
+        ) {
+        
+        adapter.log.info('enable checkmk logging of ' + id);
+        
+        add_checkmk(id,obj);
+
+        adapter.log.debug("Überwachte Datenpunkte: " + JSON.stringify(adapter._checkmkDPs));
+        
+
+        }else{
+            
+            if (adapter._checkmkDPs[id]) {
+                
+                delete_checkmk(id, obj);
+                adapter.log.info('disabled logging of ' + id);
+                adapter.log.debug("Überwachte Datenpunkte: " + JSON.stringify(adapter._checkmkDPs));
+            }
+        }
+     }); 
+    
+     
+    return adapter;
+}
+
+//Lädt die Adapter Informationen und erstellt die Services beim Adapterstart
+async function load_adapters(){
+    //adapter.subscribeForeignStates('system.adapter.*.*.connected');
+    //system.adapter.admin.0.connected
+    var test 
+    var name
+
+     let states = await adapter.getForeignStatesAsync('system.adapter.*.*.connected');
+     test = states;
+     if(states != null){
+     for (var id in states) {
+         if(states[id].val != null){
+           //adapter.log.info(id + ' = ' + states[id].val);
+          // namen der ID anpassen, sodass nur noch name Adapter.? raus kommt:
+           var end_pos = id.length;
+           end_pos = end_pos -25;
+           var new_id = id.substr(15, end_pos);
+           //adapter.log.warn(JSON.stringify(new_id));
+           //check mk Service für jeden Adapter anlegen
+           checkmk.addService(new_id,{ name: new_id, ok: 'Adapter is OK', warning: 'Adapter on Warning', critical: 'Adapter on error', counter: { status : '0;1;2;0;3' }});
+           //jede id subcriben damit die änderungen an check mk übertragen werden können.
+           update_adapter_checkmk(id, states[id]);
+           adapter.subscribeForeignStates(id);
+           // und jetzt noch den aktuellen Status des udupates übergeben:
+         }
+         }
+
+          adapter.log.warn(JSON.stringify(test));
+     }
+             
+}           
+
+// Läadt die Objekt Informationen und erstellt die Services beim Adapterstart
+async function load_objekte(){
+    adapter.log.debug("load objekte");
+    //bestehende States suchen und änderungen abbonieren:
+
+    let obj = await adapter.getForeignObjectsAsync('*');
+    
+     if(obj != null){
+     for (var id in obj) {
+        //Ist beim Objekt der Hacken gesetzt.
+        //adapter.log.debug(JSON.stringify(id));
+
+        
+        if (obj[id] && obj[id].common &&
+            (obj[id].common.custom && obj[id].common.custom[adapter.namespace] && typeof obj[id].common.custom[adapter.namespace] === 'object' && obj[id].common.custom[adapter.namespace].enabled)
+        ) 
+        {
+           add_checkmk(id,obj[id]);
+        }
+     }
     }
 
-    // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-    // /**
-    //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-    //  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-    //  * @param {ioBroker.Message} obj
-    //  */
-    // onMessage(obj) {
-    //     if (typeof obj === 'object' && obj.message) {
-    //         if (obj.command === 'send') {
-    //             // e.g. send email or pushover or whatever
-    //             this.log.info('send command');
+    //Updates fürs alles Objekte bekommen
+    adapter.subscribeForeignObjects('*');
 
-    //             // Send response in callback if required
-    //             if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-    //         }
-    //     }
-    // }
+    
+}
+
+// added ein State zu checkmk
+async function add_checkmk(id, obj){
+
+    var end_pos = id.length;
+    end_pos = end_pos -25;
+    var new_id = id.substr(15, end_pos);
+
+    var name = obj.common.name;
+
+    adapter.log.debug(JSON.stringify(id));
+    //state holen:
+    var state = await adapter.getForeignStateAsync(id);
+    //adapter.log.warn(JSON.stringify(state));
+     //wenn boolean
+     if(obj.common.type === "boolean"){
+
+         adapter.log.debug("ist boolean");
+         //variante prüfen
+         if(obj.common.custom[adapter.namespace].bool_wert_ok){
+             checkmk.addService(id,{ name: id,
+                 ok: obj.common.custom[adapter.namespace].Status_OK,
+                 warning: obj.common.custom[adapter.namespace].Status_Warning,
+                 critical: obj.common.custom[adapter.namespace].Status_critical,
+                 counter: { status : '0;1;1;0;1' }});
+             update_states_checkmk(id, state);
+             adapter.subscribeForeignStates(id);
+
+             adapter._checkmkDPs[id] = obj.common.custom[adapter.namespace];
+             adapter._checkmkDPs[id].id = id;
+             
+         }else{
+             checkmk.addService(id,{ name: id,
+                 ok: obj.common.custom[adapter.namespace].Status_OK,
+                 warning: obj.common.custom[adapter.namespace].Status_Warning,
+                 critical: obj.common.custom[adapter.namespace].Status_critical,
+                 counter: { status : '1;0;0;0;1' }});
+             update_states_checkmk(id, state);
+             adapter.subscribeForeignStates(id);
+
+             adapter._checkmkDPs[id] = obj.common.custom[adapter.namespace];
+             adapter._checkmkDPs[id].id = id;
+             
+         }
+
+     }
+     //wenn number
+     else if(obj.common.type === "number"){
+
+         adapter.log.debug("ist number");
+         checkmk.addService(id,{ name: id,
+             ok: obj.common.custom[adapter.namespace].Status_OK,
+             warning: obj.common.custom[adapter.namespace].Status_Warning,
+             critical: obj.common.custom[adapter.namespace].Status_critical,
+             counter: { status : '1;2;3;0;3' }});
+         update_states_checkmk(id, state);
+         adapter.subscribeForeignStates(id);
+
+         adapter._checkmkDPs[id] = obj.common.custom[adapter.namespace];
+         adapter._checkmkDPs[id].id = id;
+         
+
+     }
+     //wenn string
+     else if(obj.common.type === "string"){
+
+         adapter.log.debug("ist string");
+         checkmk.addService(id,{ name: id,
+             ok: obj.common.custom[adapter.namespace].Status_OK,
+             warning: obj.common.custom[adapter.namespace].Status_Warning,
+             critical: obj.common.custom[adapter.namespace].Status_critical,
+             counter: { status : '1;1;2;0;3' }});
+         update_states_checkmk(id, state);
+         adapter.subscribeForeignStates(id);
+
+         adapter._checkmkDPs[id] = obj.common.custom[adapter.namespace];
+         adapter._checkmkDPs[id].id = id;
+         
+
+     }
+     //wenn nichts
+     else{
+         adapter.log.warn("This id: " + id + " Type of " + obj.common.type + " is not supported!");
+     }
+
+
+    //checkmk.addService(new_id,{ name: new_id, ok: 'Adapter is OK', warning: 'Adapter on Warning', critical: 'Adapter on error', counter: { status : '0;1;2;0;3' }});
+    //update_states_checkmk(id, obj[id]);
+    //adapter.subscribeForeignStates(id);
+
 
 }
 
-if (require.main !== module) {
-    // Export the constructor in compact mode
-    /**
-     * @param {Partial<utils.AdapterOptions>} [options={}]
-     */
-    module.exports = (options) => new Template(options);
+// löscht ein State bei checkmk
+async function delete_checkmk(id,obj){
+
+    checkmk.deleteService(id);
+    delete adapter._checkmkDPs[id];
+
+}
+
+
+//Update Status der Adapter
+async function update_adapter_checkmk(id, state){
+
+ // namen der ID anpassen, sodass nur noch name Adapter.? raus kommt:
+ var pos = id.lastIndexOf('.');
+ pos = pos +1;
+ var end_pos = id.length;
+ end_pos = end_pos -25;
+ var new_id = id.substr(15, end_pos);
+ var teil_id = id.substr(0, pos);
+ var alive_id = teil_id + "alive";
+ 
+ //adapter.log.warn("Datenpuntk: " + id + " hat den wert: " + state.val);
+
+
+     //wenn connectet true adapter geht es gut
+
+     if(state.val == true){
+         //adapter.log.info("staus 0");
+         checkmk.updateService(new_id, {status: 1});
+     }
+     //wenn connect false
+     if(state.val == false){
+         //prüfen ob alive true ist:
+         adapter.getForeignStateAsync(alive_id, function (err, states) {
+
+             //Alive ist true, aber connection nicht da --> Error
+             if(states.val == true){
+               // adapter.log.info("staus 2");
+                 checkmk.updateService(new_id, {status: 3});
+
+             }
+             //Adapter ist aus
+             if(states.val == false){
+                //adapter.log.info("staus 1");
+                 checkmk.updateService(new_id, {status: 2});
+             }
+
+
+         });
+         
+         
+     }
+     
+     
+     //adapter.log.info(id);
+     //adapter.log.info(JSON.stringify(state));
+
+
+     //main();
+
+
+
+}
+
+//Update Status der States die überwacht werden.
+async function update_states_checkmk(id, state){
+
+    var pos = id.lastIndexOf('.');
+    pos = pos +1;
+    var end_pos = id.length;
+    end_pos = end_pos -25;
+    var new_id = id.substr(15, end_pos);
+    var teil_id = id.substr(0, pos);
+    var alive_id = teil_id + "alive";
+
+    var obj = await adapter.getForeignObjectAsync(id);
+    var typ = obj.common.type;
+    var name = obj.common.name;
+    var einstellung_bool = obj.common.custom[adapter.namespace].bool_wert_ok;
+    var einstellung_num_inverse = obj.common.custom[adapter.namespace].num_wert_inverse;
+    var einstellung_num_warn = obj.common.custom[adapter.namespace].num_wert_warning;
+    var einstellung_num_crit = obj.common.custom[adapter.namespace].num_wert_critikal;
+    var einstellung_string_ok = obj.common.custom[adapter.namespace].str_wert_ok;
+    var einstellung_string_warn = obj.common.custom[adapter.namespace].str_wert_warning;
+    var einstellung_string_crit = obj.common.custom[adapter.namespace].str_wert_critikal;
+
+    if(typ == "boolean" && einstellung_bool){
+        if(state.val == true){
+            adapter.log.info("status 1");
+            checkmk.updateService(name, {status: 2});
+        }else{
+            adapter.log.info("status 0");
+            checkmk.updateService(name, {status: 1});
+        }
+    }
+    if(typ == "boolean" && !einstellung_bool){
+        if(state.val == true){
+            adapter.log.info("status 0");
+            checkmk.updateService(name, {status: 1});
+        }else{
+            adapter.log.info("status 1");
+            checkmk.updateService(name, {status: 2});
+        }
+    }
+
+    if(typ == "number" && !einstellung_num_inverse){
+        if(state.val <= einstellung_num_warn){
+            adapter.log.info("status ok");
+            checkmk.updateService(name, {status: 1});
+        }else if(state.val > einstellung_num_warn && state.val < einstellung_num_crit)
+        {
+            adapter.log.info("status warn");
+            checkmk.updateService(name, {status: 2});
+        }else{
+            adapter.log.info("status crit");
+            checkmk.updateService(name, {status: 3});
+        }
+    }
+
+    if(typ == "number" && einstellung_num_inverse){
+        if(state.val >= einstellung_num_warn){
+            adapter.log.info("status ok");
+            checkmk.updateService(name, {status: 1});
+        }else if(state.val < einstellung_num_warn && state.val > einstellung_num_crit)
+        {
+            adapter.log.info("status warn");
+            checkmk.updateService(name, {status: 2});
+        }else{
+            adapter.log.info("status crit");
+            checkmk.updateService(name, {status: 3});
+        }
+    }
+
+    if(typ == "string"){
+        if(state.val == einstellung_string_ok){
+            adapter.log.info("status ok");
+            checkmk.updateService(name, {status: 1});
+        }else if(state.val == einstellung_string_warn)
+        {
+            adapter.log.info("status warn");
+            checkmk.updateService(name, {status: 2});
+        }else if(state.val == einstellung_string_crit)
+        {
+            adapter.log.info("status crit");
+            checkmk.updateService(name, {status: 3});
+        }else{
+            adapter.log.info("status unknow");
+            checkmk.updateService(name, {status: -1}, "status unknow");
+        }
+    }
+
+}
+
+
+
+async function main() {
+    
+    adapter.log.info("main");
+
+    //var int = new checkmk.createServer(option_checkmk);
+
+    //adapter.log.info(JSON.stringify(int));
+
+    //var dwon = checkmk.serverClose(int);
+    //adapter.log.info(dwon);
+
+    
+}
+
+// If started as allInOne/compact mode => return function to create instance
+
+// @ts-ignore
+if (module && module.parent) {
+    module.exports = startAdapter;
 } else {
-    // otherwise start the instance directly
-    new Template();
+    // or start the instance directly
+    startAdapter();
 }
