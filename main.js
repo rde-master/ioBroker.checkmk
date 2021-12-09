@@ -1,10 +1,3 @@
-/**
- Api erkärung:
- https://developer.todoist.com/rest/v1/
- Das ist ein test!
-*/
-
- 
 /*
 
 Statis für Check MK:
@@ -46,6 +39,7 @@ async function startAdapter(options) {
     adapter = new utils.Adapter(options);
 	
     //Liste aller Datenpunkte
+    // @ts-ignore
     adapter._checkmkDPs             = {};    
 
 
