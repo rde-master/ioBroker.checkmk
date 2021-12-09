@@ -11,9 +11,9 @@
 
 **Tests:** ![Test and Release](https://github.com/Author/ioBroker.template/workflows/Test%20and%20Release/badge.svg)
 
-## template adapter for ioBroker
+## checkmk for ioBroker
 
-checkmk Adapter
+Creates an checkmk agent to see the States of adaptes and selectet states in checkmk.
 
 ## Developer manual
 This Adapter is not ready!

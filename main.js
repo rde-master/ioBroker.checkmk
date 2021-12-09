@@ -85,7 +85,7 @@ async function startAdapter(options) {
     // is called if a subscribed state changes
     adapter.on('stateChange', (id, state) => {
         //nur wenn ack true ist.
-        if(state.ack){
+        if(state && state.ack){
         //prüfen ob das ein adapter ist:
             if(id.substr(0,14) == "system.adapter"){
                 //adapter.log.info("Adapter change");
