@@ -4,12 +4,9 @@
 [![NPM version](https://img.shields.io/npm/v/iobroker.template.svg)](https://www.npmjs.com/package/iobroker.template)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.template.svg)](https://www.npmjs.com/package/iobroker.template)
 ![Number of Installations](https://iobroker.live/badges/template-installed.svg)
-![Current version in stable repository](https://iobroker.live/badges/template-stable.svg)
-[![Dependency Status](https://img.shields.io/david/Author/iobroker.template.svg)](https://david-dm.org/Author/iobroker.template)
 
-[![NPM](https://nodei.co/npm/iobroker.template.png?downloads=true)](https://nodei.co/npm/iobroker.template/)
 
-**Tests:** [![Test and Release](https://github.com/rde-master/ioBroker.checkmk/actions/workflows/test-and-release.yml/badge.svg)]
+**Tests:** [![Test and Release](https://github.com/rde-master/ioBroker.checkmk/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/rde-master/ioBroker.checkmk/actions/workflows/test-and-release.yml)
 
 ## checkmk for ioBroker
 
