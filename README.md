@@ -9,7 +9,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.template.png?downloads=true)](https://nodei.co/npm/iobroker.template/)
 
-**Tests:** ![Test and Release](https://github.com/Author/ioBroker.template/workflows/Test%20and%20Release/badge.svg)
+**Tests:** [![Test and Release](https://github.com/rde-master/ioBroker.checkmk/actions/workflows/test-and-release.yml/badge.svg)]
 
 ## checkmk for ioBroker
 
