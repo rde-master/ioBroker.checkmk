@@ -157,7 +157,7 @@ async function load_objekte(){
     adapter.log.debug("load objekte");
     //bestehende States suchen und änderungen abbonieren:
 
-    let obj = await adapter.getForeignObjectsAsync('*');
+    let obj = adapter.getForeignObjects('*');
     
      if(obj != null){
      for (var id in obj) {
