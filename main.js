@@ -46,12 +46,12 @@ async function startAdapter(options) {
     // @ts-ignore
     adapter._checkmkDPs             = {};    
 
-
+    /*
     adapter.on('message', obj => {
         adapter.log.info("message: " + JSON.stringify(obj));
         //processMessages(obj);
     });
-
+    */
     adapter.on('ready', () => {
         
         option_checkmk.host = adapter.config.ip;
@@ -163,7 +163,7 @@ async function load_adapters(){
          }
          }
 
-          adapter.log.warn(JSON.stringify(test));
+          adapter.log.debug(JSON.stringify(test));
      }
              
 }           
@@ -202,10 +202,9 @@ async function load_update(){
     adapter.log.debug("load update info");
     
     num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
-    adapter.log.warn("update: " + num_update.val);
+    adapter.log.debug("update: " + num_update.val);
     if (num_update && num_update.val && num_update.val !== null) {
-        adapter.log.warn("test");
-        
+                
         checkmk.addService('Adapter Updates',{ name: 'Adapter Updates', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { status : num_update.val+';5;10' }});
         
     }
@@ -399,65 +398,65 @@ async function update_states_checkmk(id, state){
 
     if(typ == "boolean" && einstellung_bool){
         if(state.val == true){
-            adapter.log.info("status 1");
+            adapter.log.debug("status 1");
             checkmk.updateService(name, {status: 2});
         }else{
-            adapter.log.info("status 0");
+            adapter.log.debug("status 0");
             checkmk.updateService(name, {status: 1});
         }
     }
     if(typ == "boolean" && !einstellung_bool){
         if(state.val == true){
-            adapter.log.info("status 0");
+            adapter.log.debug("status 0");
             checkmk.updateService(name, {status: 1});
         }else{
-            adapter.log.info("status 1");
+            adapter.log.debug("status 1");
             checkmk.updateService(name, {status: 2});
         }
     }
 
     if(typ == "number" && !einstellung_num_inverse){
         if(state.val <= einstellung_num_warn){
-            adapter.log.info("status ok");
+            adapter.log.debug("status ok");
             checkmk.updateService(name, {status: 1});
         }else if(state.val > einstellung_num_warn && state.val < einstellung_num_crit)
         {
-            adapter.log.info("status warn");
+            adapter.log.debug("status warn");
             checkmk.updateService(name, {status: 2});
         }else{
-            adapter.log.info("status crit");
+            adapter.log.debug("status crit");
             checkmk.updateService(name, {status: 3});
         }
     }
 
     if(typ == "number" && einstellung_num_inverse){
         if(state.val >= einstellung_num_warn){
-            adapter.log.info("status ok");
+            adapter.log.debug("status ok");
             checkmk.updateService(name, {status: 1});
         }else if(state.val < einstellung_num_warn && state.val > einstellung_num_crit)
         {
-            adapter.log.info("status warn");
+            adapter.log.debug("status warn");
             checkmk.updateService(name, {status: 2});
         }else{
-            adapter.log.info("status crit");
+            adapter.log.debug("status crit");
             checkmk.updateService(name, {status: 3});
         }
     }
 
     if(typ == "string"){
         if(state.val == einstellung_string_ok){
-            adapter.log.info("status ok");
+            adapter.log.debug("status ok");
             checkmk.updateService(name, {status: 1});
         }else if(state.val == einstellung_string_warn)
         {
-            adapter.log.info("status warn");
+            adapter.log.debug("status warn");
             checkmk.updateService(name, {status: 2});
         }else if(state.val == einstellung_string_crit)
         {
-            adapter.log.info("status crit");
+            adapter.log.debug("status crit");
             checkmk.updateService(name, {status: 3});
         }else{
-            adapter.log.info("status unknow");
+            adapter.log.debug("status unknow");
             checkmk.updateService(name, {status: -1}, "status unknow");
         }
     }
@@ -468,7 +467,7 @@ async function update_states_checkmk(id, state){
 async function update_info_update_checkmk(id,state){
     adapter.log.debug("load update info udpate");
     let num_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').val;
-    adapter.log.error("update: " + num_update_neu);
+    adapter.log.debug("update: " + num_update_neu);
     if(num_update != num_update_neu && num_update_neu > 0){
         let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList').val;
         checkmk.updateService('Adapter Updates', {status: num_update_neu},update_list);
@@ -482,20 +481,6 @@ async function update_info_update_checkmk(id,state){
 }
 
 
-
-async function main() {
-    
-    adapter.log.info("main");
-
-    //var int = new checkmk.createServer(option_checkmk);
-
-    //adapter.log.info(JSON.stringify(int));
-
-    //var dwon = checkmk.serverClose(int);
-    //adapter.log.info(dwon);
-
-    
-}
 
 // If started as allInOne/compact mode => return function to create instance
 
