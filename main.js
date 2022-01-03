@@ -63,9 +63,11 @@ async function startAdapter(options) {
 
         new checkmk.createServer(option_checkmk);
         if(send_adapter_status){
+            adapter.log.info("Adapter Status Log Activ");
             load_adapters();
         }
         if(send_update_info){
+            adapter.log.info("Adapter Update Activ");
             load_update();
         }
         load_objekte();
