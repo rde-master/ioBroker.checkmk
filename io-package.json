@@ -62,7 +62,7 @@
         "type": "general",
         "getHistory": true,
         "connectionType": "local",
-        "dataSource": "none",
+        "dataSource": "poll",
         "tier": 3,
         "compact": false,
         "materialize": true,
