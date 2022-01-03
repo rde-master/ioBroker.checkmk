@@ -470,7 +470,7 @@ async function update_info_update_checkmk(id,state){
     adapter.log.debug("load update info udpate");
     let egal_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
     let num_update_neu = egal_update_neu.val;
-    adapter.log.debug("update: " + num_update_neu);
+    //adapter.log.debug("update: " + num_update_neu);
     if(num_update != num_update_neu && num_update_neu > 0){
         let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList');
         checkmk.updateService('Adapter_Update_Status', {updates: num_update_neu}, 'Updates: '+ num_update_neu);
