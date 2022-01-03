@@ -200,7 +200,7 @@ async function load_objekte(){
 
 //Lädt die Update Informationen zu check mk
 async function load_update(){
-    try{
+    
     adapter.log.debug("load update info");
     
     num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').catch((e) => adapter.log.warn(e));;
@@ -214,11 +214,7 @@ async function load_update(){
         
 
     adapter.subscribeForeignStates('admin.0.info.updatesNumber');
-    }
-    catch(error){
-        
-    }
-
+    
     update_info_update_checkmk('id','state');
 }
 
