@@ -143,7 +143,7 @@ async function load_adapters(){
     var test 
     var name
 
-     let states = await adapter.getForeignStatesAsync('system.adapter.*.*.connected');
+     let states = await adapter.getForeignStatesAsync('system.adapter.*.*.connected').catch((e) => adapter.log.warn(e));;
      test = states;
      if(states){
      for (var id in states) {
@@ -201,7 +201,7 @@ async function load_update(){
     try{
     adapter.log.debug("load update info");
     
-    num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
+    num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').catch((e) => adapter.log.warn(e));;
     adapter.log.debug("update: " + num_update.val);
     if (num_update && num_update.val && num_update.val !== null) {
                 
@@ -231,7 +231,7 @@ async function add_checkmk(id, obj){
 
     adapter.log.debug(JSON.stringify(id));
     //state holen:
-    var state = await adapter.getForeignStateAsync(id);
+    var state = await adapter.getForeignStateAsync(id).catch((e) => adapter.log.warn(e));;
     //adapter.log.warn(JSON.stringify(state));
      //wenn boolean
      if(obj.common.type === "boolean"){
@@ -468,11 +468,11 @@ async function update_states_checkmk(id, state){
 // schreibe neue Updateinformationen 
 async function update_info_update_checkmk(id,state){
     adapter.log.debug("load update info udpate");
-    let egal_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
+    let egal_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').catch((e) => adapter.log.warn(e));;
     let num_update_neu = egal_update_neu.val;
     //adapter.log.debug("update: " + num_update_neu);
     if(num_update != num_update_neu && num_update_neu > 0){
-        let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList');
+        let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList').catch((e) => adapter.log.warn(e));;
         checkmk.updateService('Adapter_Update_Status', {updates: num_update_neu}, 'Updates: '+ num_update_neu);
         checkmk.updateService('Adapter_Updates', {updates: num_update_neu},update_list.val);
     }
