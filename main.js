@@ -147,8 +147,8 @@ async function load_adapters(){
      test = states;
      if(states){
      for (var id in states) {
-         if(states[id].val){
-           //adapter.log.info(id + ' = ' + states[id].val);
+         if(states[id] && states[id].val && states[id].val !== null){
+            //adapter.log.info(id + ' = ' + states[id].val);
           // namen der ID anpassen, sodass nur noch name Adapter.? raus kommt:
            var end_pos = id.length;
            end_pos = end_pos -25;
