@@ -205,7 +205,7 @@ async function load_update(){
     adapter.log.debug("update: " + num_update.val);
     if (num_update && num_update.val && num_update.val !== null) {
                 
-        checkmk.addService('Adapter Updates',{ name: 'Adapter Updates', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { status : num_update.val+';5;10' }});
+        checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { status : num_update.val+';5;10' }});
         
     }
     
@@ -470,11 +470,11 @@ async function update_info_update_checkmk(id,state){
     adapter.log.debug("update: " + num_update_neu);
     if(num_update != num_update_neu && num_update_neu > 0){
         let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList').val;
-        checkmk.updateService('Adapter Updates', {status: num_update_neu},update_list);
+        checkmk.updateService('Adapter_Updates', {status: num_update_neu},update_list);
     }
     if(num_update != num_update_neu && num_update_neu == 0){
 
-        checkmk.updateService('Adapter Updates', {status: 0});
+        checkmk.updateService('Adapter_Updates', {status: 0});
 
     }
     
