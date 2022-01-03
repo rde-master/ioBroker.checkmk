@@ -175,7 +175,7 @@ async function load_objekte(){
     adapter.log.debug("load objekte");
     //bestehende States suchen und änderungen abbonieren:
 
-    let obj = adapter.getForeignObjects('*');
+    let obj = await adapter.getForeignObjectsAsync('*');
     
      if(obj != null){
      for (var id in obj) {
@@ -225,8 +225,6 @@ async function add_checkmk(id, obj){
     end_pos = end_pos -25;
     var new_id = id.substr(15, end_pos);
 
-    var name = obj.common.name;
-
     adapter.log.debug(JSON.stringify(id));
     //state holen:
     var state = await adapter.getForeignStateAsync(id).catch((e) => adapter.log.warn(e));;
@@ -271,7 +269,7 @@ async function add_checkmk(id, obj){
              ok: obj.common.custom[adapter.namespace].Status_OK,
              warning: obj.common.custom[adapter.namespace].Status_Warning,
              critical: obj.common.custom[adapter.namespace].Status_critical,
-             counter: { status : '0;1;2' }});
+             counter: { status : '0;'+obj.common.custom[adapter.namespace].num_wert_warning+';'+obj.common.custom[adapter.namespace].num_wert_critikal+'' }});
          update_states_checkmk(id, state);
          adapter.subscribeForeignStates(id);
 
@@ -387,7 +385,7 @@ async function update_states_checkmk(id, state){
 
     var obj = await adapter.getForeignObjectAsync(id);
     var typ = obj.common.type;
-    var name = obj.common.name;
+    var name = id;
     var einstellung_bool = obj.common.custom[adapter.namespace].bool_wert_ok;
     var einstellung_num_inverse = obj.common.custom[adapter.namespace].num_wert_inverse;
     var einstellung_num_warn = obj.common.custom[adapter.namespace].num_wert_warning;
@@ -396,30 +394,33 @@ async function update_states_checkmk(id, state){
     var einstellung_string_warn = obj.common.custom[adapter.namespace].str_wert_warning;
     var einstellung_string_crit = obj.common.custom[adapter.namespace].str_wert_critikal;
 
+    adapter.log.debug("name: " + name);
+    adapter.log.debug("statve value: " + state.val);
+
     if(typ == "boolean" && einstellung_bool){
         if(state.val == true){
-            adapter.log.debug("status 1");
-            checkmk.updateService(name, {status: 1});
-        }else{
             adapter.log.debug("status 0");
             checkmk.updateService(name, {status: 0});
+        }else{
+            adapter.log.debug("status 1");
+            checkmk.updateService(name, {status: 1});
         }
     }
     if(typ == "boolean" && !einstellung_bool){
         if(state.val == true){
-            adapter.log.debug("status 0");
-            checkmk.updateService(name, {status: 0});
-        }else{
             adapter.log.debug("status 1");
             checkmk.updateService(name, {status: 1});
+        }else{
+            adapter.log.debug("status 0");
+            checkmk.updateService(name, {status: 0});
         }
     }
 
     if(typ == "number" && !einstellung_num_inverse){
-        if(state.val <= einstellung_num_warn){
+        if(state.val < einstellung_num_warn){
             adapter.log.debug("status ok");
             checkmk.updateService(name, {status: 0});
-        }else if(state.val > einstellung_num_warn && state.val < einstellung_num_crit)
+        }else if(state.val >= einstellung_num_warn && state.val < einstellung_num_crit)
         {
             adapter.log.debug("status warn");
             checkmk.updateService(name, {status: 1});
