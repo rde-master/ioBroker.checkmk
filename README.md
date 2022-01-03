@@ -86,7 +86,7 @@ Dies geht in den jeweiligen Einstellungen des Datenpunktes
 ## License
 MIT License
 
-Copyright (c) 2021 rde-master <info@rde-master.de>
+Copyright (c) 2022 rde-master <info@rde-master.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
