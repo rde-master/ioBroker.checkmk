@@ -157,7 +157,7 @@ async function load_adapters(){
            var new_id = id.substr(15, end_pos);
            //adapter.log.warn(JSON.stringify(new_id));
            //check mk Service für jeden Adapter anlegen
-           checkmk.addService(new_id,{ name: new_id, ok: 'Adapter is OK', warning: 'Adapter on Warning', critical: 'Adapter on error', counter: { status : '0;1;2;0;3' }});
+           checkmk.addService(new_id,{ name: new_id, ok: 'Adapter is OK', warning: 'Adapter on Warning', critical: 'Adapter on error', counter: { status : '0;1;2' }});
            //jede id subcriben damit die änderungen an check mk übertragen werden können.
            update_adapter_checkmk(id, states[id]);
            adapter.subscribeForeignStates(id);
@@ -200,22 +200,22 @@ async function load_objekte(){
 
 //Lädt die Update Informationen zu check mk
 async function load_update(){
-    
-    adapter.log.debug("load update info");
+       adapter.log.debug("load update info");
     
     num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').catch((e) => adapter.log.warn(e));;
     adapter.log.debug("update: " + num_update.val);
-    if (num_update && num_update.val && num_update.val !== null) {
-                
-        checkmk.addService('Adapter_Update_Status',{ name: 'Adapter_Update_Status', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { updates : num_update.val+';5;10' }});
+    //if (num_update && num_update.val && num_update.val !== null) {
+    
+    
+        checkmk.addService('Adapter_Update_Status',{ name: 'Adapter_Update_Status', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { updates : num_update.val+';1;10' }});
         checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: ' ', critical: ' ', counter: { updates : num_update.val+';5;10' }});
-    }
+    
     
         
 
     adapter.subscribeForeignStates('admin.0.info.updatesNumber');
     
-    update_info_update_checkmk('id','state');
+    //update_info_update_checkmk('id','state');
 }
 
 // added ein State zu checkmk
@@ -241,7 +241,7 @@ async function add_checkmk(id, obj){
                  ok: obj.common.custom[adapter.namespace].Status_OK,
                  warning: obj.common.custom[adapter.namespace].Status_Warning,
                  critical: obj.common.custom[adapter.namespace].Status_critical,
-                 counter: { status : '0;1;1;0;1' }});
+                 counter: { status : '0;1;1' }});
              update_states_checkmk(id, state);
              adapter.subscribeForeignStates(id);
 
@@ -253,7 +253,7 @@ async function add_checkmk(id, obj){
                  ok: obj.common.custom[adapter.namespace].Status_OK,
                  warning: obj.common.custom[adapter.namespace].Status_Warning,
                  critical: obj.common.custom[adapter.namespace].Status_critical,
-                 counter: { status : '1;0;0;0;1' }});
+                 counter: { status : '1;0;0' }});
              update_states_checkmk(id, state);
              adapter.subscribeForeignStates(id);
 
@@ -271,7 +271,7 @@ async function add_checkmk(id, obj){
              ok: obj.common.custom[adapter.namespace].Status_OK,
              warning: obj.common.custom[adapter.namespace].Status_Warning,
              critical: obj.common.custom[adapter.namespace].Status_critical,
-             counter: { status : '1;2;3;0;3' }});
+             counter: { status : '0;1;2' }});
          update_states_checkmk(id, state);
          adapter.subscribeForeignStates(id);
 
@@ -288,7 +288,7 @@ async function add_checkmk(id, obj){
              ok: obj.common.custom[adapter.namespace].Status_OK,
              warning: obj.common.custom[adapter.namespace].Status_Warning,
              critical: obj.common.custom[adapter.namespace].Status_critical,
-             counter: { status : '1;1;2;0;3' }});
+             counter: { status : '0;1;2' }});
          update_states_checkmk(id, state);
          adapter.subscribeForeignStates(id);
 
@@ -338,7 +338,7 @@ async function update_adapter_checkmk(id, state){
 
      if(state.val == true){
          //adapter.log.info("staus 0");
-         checkmk.updateService(new_id, {status: 1});
+         checkmk.updateService(new_id, {status: 0});
      }
      //wenn connect false
      if(state.val == false){
@@ -348,13 +348,13 @@ async function update_adapter_checkmk(id, state){
              //Alive ist true, aber connection nicht da --> Error
              if(states.val == true){
                // adapter.log.info("staus 2");
-                 checkmk.updateService(new_id, {status: 3});
+                 checkmk.updateService(new_id, {status: 2});
 
              }
              //Adapter ist aus
              if(states.val == false){
                 //adapter.log.info("staus 1");
-                 checkmk.updateService(new_id, {status: 2});
+                 checkmk.updateService(new_id, {status: 1});
              }
 
 
@@ -399,62 +399,62 @@ async function update_states_checkmk(id, state){
     if(typ == "boolean" && einstellung_bool){
         if(state.val == true){
             adapter.log.debug("status 1");
-            checkmk.updateService(name, {status: 2});
+            checkmk.updateService(name, {status: 1});
         }else{
             adapter.log.debug("status 0");
-            checkmk.updateService(name, {status: 1});
+            checkmk.updateService(name, {status: 0});
         }
     }
     if(typ == "boolean" && !einstellung_bool){
         if(state.val == true){
             adapter.log.debug("status 0");
-            checkmk.updateService(name, {status: 1});
+            checkmk.updateService(name, {status: 0});
         }else{
             adapter.log.debug("status 1");
-            checkmk.updateService(name, {status: 2});
+            checkmk.updateService(name, {status: 1});
         }
     }
 
     if(typ == "number" && !einstellung_num_inverse){
         if(state.val <= einstellung_num_warn){
             adapter.log.debug("status ok");
-            checkmk.updateService(name, {status: 1});
+            checkmk.updateService(name, {status: 0});
         }else if(state.val > einstellung_num_warn && state.val < einstellung_num_crit)
         {
             adapter.log.debug("status warn");
-            checkmk.updateService(name, {status: 2});
+            checkmk.updateService(name, {status: 1});
         }else{
             adapter.log.debug("status crit");
-            checkmk.updateService(name, {status: 3});
+            checkmk.updateService(name, {status: 2});
         }
     }
 
     if(typ == "number" && einstellung_num_inverse){
         if(state.val >= einstellung_num_warn){
             adapter.log.debug("status ok");
-            checkmk.updateService(name, {status: 1});
+            checkmk.updateService(name, {status: 0});
         }else if(state.val < einstellung_num_warn && state.val > einstellung_num_crit)
         {
             adapter.log.debug("status warn");
-            checkmk.updateService(name, {status: 2});
+            checkmk.updateService(name, {status: 1});
         }else{
             adapter.log.debug("status crit");
-            checkmk.updateService(name, {status: 3});
+            checkmk.updateService(name, {status: 2});
         }
     }
 
     if(typ == "string"){
         if(state.val == einstellung_string_ok){
             adapter.log.debug("status ok");
-            checkmk.updateService(name, {status: 1});
+            checkmk.updateService(name, {status: 0});
         }else if(state.val == einstellung_string_warn)
         {
             adapter.log.debug("status warn");
-            checkmk.updateService(name, {status: 2});
+            checkmk.updateService(name, {status: 1});
         }else if(state.val == einstellung_string_crit)
         {
             adapter.log.debug("status crit");
-            checkmk.updateService(name, {status: 3});
+            checkmk.updateService(name, {status: 2});
         }else{
             adapter.log.debug("status unknow");
             checkmk.updateService(name, {status: -1}, "status unknow");
