@@ -81,7 +81,7 @@ Dies geht in den jeweiligen Einstellungen des Datenpunktes
 * (rde-master) initial release
 
 ### **WORK IN PROGRESS**
-* (rde-master) initial release
+* (rde-master) evereything
 
 ## License
 MIT License
