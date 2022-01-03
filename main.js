@@ -205,8 +205,8 @@ async function load_update(){
     adapter.log.debug("update: " + num_update.val);
     if (num_update && num_update.val && num_update.val !== null) {
                 
-        checkmk.addService('Adapter_Update_Status',{ name: 'Adapter_Update_Status', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { updates : num_update.val+';5;10;0;100' }});
-        checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: ' ', critical: ' ', counter: { updates : num_update.val+';5;10;0;100' }});
+        checkmk.addService('Adapter_Update_Status',{ name: 'Adapter_Update_Status', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { updates : num_update.val+';5;10' }});
+        checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: ' ', critical: ' ', counter: { updates : num_update.val+';5;10' }});
     }
     
         
