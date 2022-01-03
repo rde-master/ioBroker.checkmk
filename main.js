@@ -205,8 +205,8 @@ async function load_update(){
     adapter.log.debug("update: " + num_update.val);
     if (num_update && num_update.val && num_update.val !== null) {
                 
-        checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { status : num_update.val+';5;10' }});
-        
+        checkmk.addService('Adapter_Update_Status',{ name: 'Adapter_Update_Status', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { updates : num_update.val+';5;10' }});
+        checkmk.addService('Adapter_Updates',{ name: 'Adapter_Updates', ok: 'No Updates available', warning: ' ', critical: ' ', counter: { updates : num_update.val+';5;10' }});
     }
     
         
@@ -216,6 +216,8 @@ async function load_update(){
     catch(error){
         
     }
+
+    update_info_update_checkmk('id','state');
 }
 
 // added ein State zu checkmk
@@ -466,15 +468,18 @@ async function update_states_checkmk(id, state){
 // schreibe neue Updateinformationen 
 async function update_info_update_checkmk(id,state){
     adapter.log.debug("load update info udpate");
-    let num_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').val;
+    let egal_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
+    let num_update_neu = egal_update_neu.val;
     adapter.log.debug("update: " + num_update_neu);
     if(num_update != num_update_neu && num_update_neu > 0){
-        let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList').val;
-        checkmk.updateService('Adapter_Updates', {status: num_update_neu},update_list);
+        let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList');
+        checkmk.updateService('Adapter_Update_Status', {updates: num_update_neu}, 'Updates: '+ num_update_neu);
+        checkmk.updateService('Adapter_Updates', {updates: num_update_neu},update_list.val);
     }
     if(num_update != num_update_neu && num_update_neu == 0){
 
-        checkmk.updateService('Adapter_Updates', {status: 0});
+        checkmk.updateService('Adapter_Update_Status', {updates: 0});
+        checkmk.updateService('Adapter_Updates', {updates: 0});
 
     }
     
