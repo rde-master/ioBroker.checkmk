@@ -3,11 +3,14 @@
 <head>
 
     <!-- Load ioBroker scripts and styles-->
+    <link rel="stylesheet" type="text/css" href="../../lib/css/fancytree/ui.fancytree.min.css" />
     <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
     <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
 
     <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../../lib/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../../lib/js/jquery.fancytree-all.min.js"></script>
 
     <script type="text/javascript" src="../../js/translate.js"></script>
     <script type="text/javascript" src="../../lib/js/materialize.js"></script>
@@ -42,7 +45,10 @@
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
         }
-
+        function loadOptions() {
+                $('.collapsible').collapsible();
+            }
+        loadOptions();
         // This will be called by the admin adapter when the user presses the save button
         function save(callback) {
             // example: select elements with class=value and build settings object
@@ -60,7 +66,20 @@
             callback(obj);
         }
     </script>
-
+     <style>
+        .marg {
+            margin-top: 2em;
+        }
+        .adapter-body {
+            overflow: hidden !important;
+        }
+        table.highlight > tbody > tr {
+            transition: background-color .25s ease !important;
+        }
+        table.highlight > tbody > tr:hover {
+            background-color: rgba(200, 200, 200, 0.5) !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -69,7 +88,7 @@
 
         <div class="row">
             <div class="col s12 m4 l2">
-                <img src="template.png" class="logo">
+                <img src="checkmk_logo.png" class="logo">
             </div>
         </div>
 
@@ -90,6 +109,25 @@
                 <span class="translate">Insert the Port where the Check MK Agent looks</span>
             </div>
         </div>
+
+        
+    
+                <div class="row">
+               
+                    
+                    <div class="input-field col s12 m4 l4">
+                        <input id="Adapter_Status" type="checkbox" class="value" />
+                        <span class="translate" for="debug">Adapter_Status</span>
+                        <br><span class="translate">Send adapter status to check mk</span>
+                    </div>
+                    <div class="input-field col s12 m4 l4">
+                        <input id="Updates" type="checkbox" class="value" />
+                        <span class="translate" for="dublicate">Updates</span>
+                        <br><span class="translate">Send available updates to check mk</span>
+                    </div>
+                    
+                </div>
+          
 
     </div>
 

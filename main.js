@@ -28,6 +28,10 @@ const adapterName = require('./package.json').name.split('.').pop();
 const checkmk = require('./lib/checkmk.js');
 let option_checkmk = {host: '', port: 0, encoding: 'utf8', exclusive: true};
 
+let send_adapter_status = false;
+let send_update_info = false;
+let num_update = {};
+
 
 let adapter;
 
@@ -52,12 +56,20 @@ async function startAdapter(options) {
         
         option_checkmk.host = adapter.config.ip;
         option_checkmk.port = adapter.config.port;
+        
+        send_adapter_status = adapter.config.Adapter_Status;
+        send_update_info = adapter.config.Updates;
 
 
         new checkmk.createServer(option_checkmk);
-        load_adapters();
+        if(send_adapter_status){
+            load_adapters();
+        }
+        if(send_update_info){
+            load_update();
+        }
         load_objekte();
-        main();
+        
         
     });
 
@@ -81,9 +93,13 @@ async function startAdapter(options) {
         //nur wenn ack true ist.
         if(state && state.ack){
         //prüfen ob das ein adapter ist:
-            if(id.substr(0,14) == "system.adapter"){
+            if(id.substr(0,14) == "system.adapter" && send_adapter_status){
                 //adapter.log.info("Adapter change");
                 update_adapter_checkmk(id,state);
+            }else if(id == "admin.0.info.updatesNumber" && send_update_info){
+
+                update_info_update_checkmk(id,state);
+
             }else{
                 //adapter.log.info("state change");
                 update_states_checkmk(id,state);
@@ -129,9 +145,9 @@ async function load_adapters(){
 
      let states = await adapter.getForeignStatesAsync('system.adapter.*.*.connected');
      test = states;
-     if(states != null){
+     if(states){
      for (var id in states) {
-         if(states[id].val != null){
+         if(states[id].val){
            //adapter.log.info(id + ' = ' + states[id].val);
           // namen der ID anpassen, sodass nur noch name Adapter.? raus kommt:
            var end_pos = id.length;
@@ -178,6 +194,29 @@ async function load_objekte(){
     adapter.subscribeForeignObjects('*');
 
     
+}
+
+//Lädt die Update Informationen zu check mk
+async function load_update(){
+    try{
+    adapter.log.debug("load update info");
+    
+    num_update = await adapter.getForeignStateAsync('admin.0.info.updatesNumber');
+    adapter.log.warn("update: " + num_update.val);
+    if (num_update && num_update.val && num_update.val !== null) {
+        adapter.log.warn("test");
+        
+        checkmk.addService('Adapter Updates',{ name: 'Adapter Updates', ok: 'No Updates available', warning: 'some updates ar available', critical: 'many updates are available', counter: { status : num_update.val+';5;10' }});
+        
+    }
+    
+        
+
+    adapter.subscribeForeignStates('admin.0.info.updatesNumber');
+    }
+    catch(error){
+        
+    }
 }
 
 // added ein State zu checkmk
@@ -423,6 +462,23 @@ async function update_states_checkmk(id, state){
         }
     }
 
+}
+
+// schreibe neue Updateinformationen 
+async function update_info_update_checkmk(id,state){
+    adapter.log.debug("load update info udpate");
+    let num_update_neu = await adapter.getForeignStateAsync('admin.0.info.updatesNumber').val;
+    adapter.log.error("update: " + num_update_neu);
+    if(num_update != num_update_neu && num_update_neu > 0){
+        let update_list = await adapter.getForeignStateAsync('admin.0.info.updatesList').val;
+        checkmk.updateService('Adapter Updates', {status: num_update_neu},update_list);
+    }
+    if(num_update != num_update_neu && num_update_neu == 0){
+
+        checkmk.updateService('Adapter Updates', {status: 0});
+
+    }
+    
 }
 
 
